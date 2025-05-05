@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock Test</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .question { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
+    .option { margin-left: 20px; }
+    #score { font-weight: bold; margin-top: 20px; color: green; }
+    .btn { padding: 10px 15px; margin: 10px 0; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Take the Mock Test</h2>
+  <form id="testForm"></form>
+  <button class="btn" onclick="submitTest()">Submit Test</button>
+  <div id="score"></div>  <script>
+    const testData = JSON.parse(localStorage.getItem('mockTestData')) || [];
+    const form = document.getElementById('testForm');
+
+    testData.forEach((q, idx) => {
+      const qDiv = document.createElement('div');
+      qDiv.className = 'question';
+      qDiv.innerHTML = `<strong>Q${idx + 1}: ${q.question}</strong><br>`;
+      q.options.forEach((opt, i) => {
+        qDiv.innerHTML += `
+          <div class="option">
+            <input type="radio" name="q${idx}" value="${i}" id="q${idx}opt${i}" required>
+            <label for="q${idx}opt${i}">${String.fromCharCode(65 + i)}. ${opt}</label>
+          </div>
+        `;
+      });
+      form.appendChild(qDiv);
+    });
+
+    function submitTest() {
+      let score = 0;
+      testData.forEach((q, idx) => {
+        const selected = document.querySelector(`input[name='q${idx}']:checked`);
+        if (selected && parseInt(selected.value) === q.correct) {
+          score++;
+        }
+      });
+      document.getElementById('score').innerText = `You scored ${score} out of ${testData.length}`;
+    }
+  </script></body>
+</html>

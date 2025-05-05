@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mock Test Creator</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .question-block { border: 1px solid #ccc; padding: 10px; margin-bottom: 15px; }
+    input[type="text"] { width: 100%; margin-bottom: 5px; }
+    .btn { padding: 10px 15px; margin: 10px 0; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Set Mock Test Questions</h2>  <div id="questionForm">
+    <!-- Questions will appear here -->
+  </div><button class="btn" onclick="addQuestion()">Add Question</button> <button class="btn" onclick="generatePreview()">Generate Test Preview</button>
+
+  <script>
+    let questions = [];
+
+    function addQuestion() {
+      const qIndex = questions.length;
+      const div = document.createElement('div');
+      div.className = 'question-block';
+      div.innerHTML = `
+        <label>Question ${qIndex + 1}:</label>
+        <input type="text" id="q${qIndex}" placeholder="Enter question text" required><br>
+        <label>Options:</label><br>
+        <input type="text" id="q${qIndex}opt0" placeholder="Option A" required><br>
+        <input type="text" id="q${qIndex}opt1" placeholder="Option B" required><br>
+        <input type="text" id="q${qIndex}opt2" placeholder="Option C" required><br>
+        <input type="text" id="q${qIndex}opt3" placeholder="Option D" required><br>
+        <input type="text" id="q${qIndex}opt4" placeholder="More than one of the above" value="More than one of the above" required><br>
+        <input type="text" id="q${qIndex}opt5" placeholder="None of the above" value="None of the above" required><br>
+        <label>Correct Option (0-5):</label>
+        <input type="number" id="q${qIndex}correct" min="0" max="5" required>
+      `;
+      document.getElementById('questionForm').appendChild(div);
+      questions.push({});
+    }
+
+    function generatePreview() {
+      const filledQuestions = questions.map((_, index) => {
+        return {
+          question: document.getElementById(`q${index}`).value,
+          options: [0,1,2,3,4,5].map(i => document.getElementById(`q${index}opt${i}`).value),
+          correct: parseInt(document.getElementById(`q${index}correct`).value)
+        };
+      });
+      localStorage.setItem('mockTestData', JSON.stringify(filledQuestions));
+      window.location.href = 'preview.html';
+    }
+  </script></body>
+</html>
