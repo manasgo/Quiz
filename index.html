@@ -4,85 +4,101 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MCQ Quiz</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
-    .quiz-container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .question { font-size: 18px; margin-bottom: 10px; }
-    .options button { display: block; width: 100%; margin-bottom: 8px; padding: 10px; font-size: 16px; cursor: pointer; }
-    .timer { margin-top: 15px; }
-    .result { font-size: 20px; text-align: center; margin-top: 20px; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .question { margin-bottom: 20px; }
+    .option { display: block; margin: 5px 0; }
+    .hidden { display: none; }
+    #timer { font-weight: bold; color: red; }
   </style>
 </head>
 <body>
-  <div class="quiz-container">
-    <div id="quiz">
-      <div class="question" id="question"></div>
-      <div class="options" id="options"></div>
-      <div class="timer">Time Left: <span id="timer">60</span> seconds</div>
-      <button onclick="nextQuestion()">Next</button>
-    </div>
-    <div class="result" id="result" style="display:none;"></div>
-  </div>  <script>
-    const questions = [
-      {
-        question: "Which of the following is a fruit?",
-        options: ["Carrot", "Apple", "Spinach", "Potato", "More than one of the above", "None of the above"],
-        correctIndex: 1,
-      },
-      // Add more questions as needed
-    ];
-
+  <h1>Set Quiz Questions (Admin Page)</h1>
+  <textarea id="quizData" rows="10" cols="80" placeholder="Enter questions in this format:
+Question text?|Option A|Option B|Option C|Option D|More than one of the above|None of the above|Correct option index (0-5)"></textarea>
+  <br>
+  <button onclick="saveQuiz()">Save Quiz</button>  <hr>
+  <h1>Take Quiz (User Page)</h1>
+  <button onclick="startQuiz()">Start Quiz</button>
+  <div id="quizContainer" class="hidden">
+    <div id="timer">Time left: 60s</div>
+    <div id="questionBox"></div>
+    <button onclick="submitAnswer()">Submit</button>
+  </div>
+  <div id="result" class="hidden"></div>  <script>
+    let quiz = [];
     let current = 0;
     let score = 0;
-    let selected = null;
+    let timer;
     let timeLeft = 60;
-    let timerInterval;
+
+    function saveQuiz() {
+      const lines = document.getElementById('quizData').value.trim().split('\n');
+      localStorage.setItem('quiz', JSON.stringify(lines));
+      alert('Quiz saved!');
+    }
 
     function startQuiz() {
+      const rawData = JSON.parse(localStorage.getItem('quiz')) || [];
+      quiz = rawData.map(line => {
+        const parts = line.split('|');
+        return {
+          question: parts[0],
+          options: parts.slice(1, 7),
+          answer: parseInt(parts[7])
+        };
+      });
+      current = 0;
+      score = 0;
+      document.getElementById('result').classList.add('hidden');
+      document.getElementById('quizContainer').classList.remove('hidden');
       showQuestion();
-      timerInterval = setInterval(() => {
+      startTimer();
+    }
+
+    function showQuestion() {
+      if (current >= quiz.length) return showResult();
+      timeLeft = 60;
+      document.getElementById('timer').textContent = 'Time left: 60s';
+      const q = quiz[current];
+      const html = `
+        <div class="question">
+          <h3>${q.question}</h3>
+          ${q.options.map((opt, i) => `<label class="option"><input type="radio" name="opt" value="${i}" /> ${opt}</label>`).join('')}
+        </div>`;
+      document.getElementById('questionBox').innerHTML = html;
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = `Time left: ${timeLeft}s`;
         if (timeLeft <= 0) {
-          nextQuestion();
-        } else {
-          document.getElementById('timer').innerText = --timeLeft;
+          submitAnswer();
         }
       }, 1000);
     }
 
-    function showQuestion() {
-      timeLeft = 60;
-      const q = questions[current];
-      document.getElementById('question').innerText = q.question;
-      const optionsContainer = document.getElementById('options');
-      optionsContainer.innerHTML = '';
-      q.options.forEach((opt, index) => {
-        const btn = document.createElement('button');
-        btn.innerText = opt;
-        btn.onclick = () => selectOption(index);
-        optionsContainer.appendChild(btn);
-      });
-    }
-
-    function selectOption(index) {
-      selected = index;
-    }
-
-    function nextQuestion() {
-      if (selected === questions[current].correctIndex) {
+    function submitAnswer() {
+      clearInterval(timer);
+      const selected = document.querySelector('input[name="opt"]:checked');
+      if (selected && parseInt(selected.value) === quiz[current].answer) {
         score++;
       }
-      selected = null;
       current++;
-      if (current < questions.length) {
+      if (current < quiz.length) {
         showQuestion();
+        startTimer();
       } else {
-        clearInterval(timerInterval);
-        document.getElementById('quiz').style.display = 'none';
-        document.getElementById('result').style.display = 'block';
-        document.getElementById('result').innerText = `Quiz Completed! Your Score: ${score}/${questions.length}`;
+        showResult();
       }
     }
 
-    startQuiz();
+    function showResult() {
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('result').innerHTML = `<h2>Your score: ${score} / ${quiz.length}</h2>`;
+    }
   </script></body>
 </html>
 
