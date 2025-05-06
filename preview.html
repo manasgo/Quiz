@@ -1,68 +1,89 @@
-<!-- --- index.html --- -->
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mock Test Creator</title>
+  <title>Take Quiz</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    .question-block { border: 1px solid #ccc; padding: 10px; margin-bottom: 15px; }
-    input[type="text"] { width: 100%; margin-bottom: 5px; }
-    .btn { padding: 10px 15px; margin: 10px 0; cursor: pointer; }
-    textarea { width: 100%; height: 80px; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .question { margin-bottom: 20px; }
+    .option { display: block; margin: 5px 0; }
+    #timer { font-weight: bold; color: red; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <h2>Set Mock Test Questions</h2>
+  <h1>Online Quiz</h1>
+  <div id="quizContainer">
+    <div id="timer">Time left: 60s</div>
+    <div id="questionBox"></div>
+    <button onclick="submitAnswer()">Submit</button>
+  </div>
+  <div id="result" class="hidden"></div>  <script>
+    let quiz = [];
+    let current = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 60;
 
-  <div id="questionForm"></div>
-
-  <button class="btn" onclick="addQuestion()">Add Question</button>
-  <button class="btn" onclick="generatePreview()">Generate Test Link</button>
-
-  <h3>Shareable Link:</h3>
-  <textarea id="shareLink" readonly></textarea>
-
-  <script>
-    let questions = [];
-
-    function addQuestion() {
-      const qIndex = questions.length;
-      const div = document.createElement('div');
-      div.className = 'question-block';
-      div.innerHTML = `
-        <label>Question ${qIndex + 1}:</label>
-        <input type="text" id="q${qIndex}" placeholder="Enter question text" required><br>
-        <label>Options:</label><br>
-        <input type="text" id="q${qIndex}opt0" placeholder="Option A" required><br>
-        <input type="text" id="q${qIndex}opt1" placeholder="Option B" required><br>
-        <input type="text" id="q${qIndex}opt2" placeholder="Option C" required><br>
-        <input type="text" id="q${qIndex}opt3" placeholder="Option D" required><br>
-        <input type="text" id="q${qIndex}opt4" placeholder="More than one of the above" value="More than one of the above" required><br>
-        <input type="text" id="q${qIndex}opt5" placeholder="None of the above" value="None of the above" required><br>
-        <label>Correct Option (0-5):</label>
-        <input type="number" id="q${qIndex}correct" min="0" max="5" required>
-      `;
-      document.getElementById('questionForm').appendChild(div);
-      questions.push({});
-    }
-
-    function generatePreview() {
-      const filledQuestions = questions.map((_, index) => {
+    window.onload = function() {
+      const rawData = JSON.parse(localStorage.getItem('quiz')) || [];
+      quiz = rawData.map(line => {
+        const parts = line.split('|');
         return {
-          question: document.getElementById(`q${index}`).value.trim(),
-          options: [0,1,2,3,4,5].map(i => document.getElementById(`q${index}opt${i}`).value.trim()),
-          correct: parseInt(document.getElementById(`q${index}correct`).value.trim())
+          question: parts[0],
+          options: parts.slice(1, 7),
+          answer: parseInt(parts[7])
         };
       });
-      const json = JSON.stringify(filledQuestions);
-      const base64 = btoa(encodeURIComponent(json));
-      const link = `preview.html?data=${base64}`;
-      document.getElementById('shareLink').value = link;
+      showQuestion();
+      startTimer();
+    };
+
+    function showQuestion() {
+      if (current >= quiz.length) return showResult();
+      timeLeft = 60;
+      document.getElementById('timer').textContent = 'Time left: 60s';
+      const q = quiz[current];
+      const html = `
+        <div class="question">
+          <h3>${q.question}</h3>
+          ${q.options.map((opt, i) => `<label class="option"><input type="radio" name="opt" value="${i}" /> ${opt}</label>`).join('')}
+        </div>`;
+      document.getElementById('questionBox').innerHTML = html;
     }
-  </script>
-</body>
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = `Time left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          submitAnswer();
+        }
+      }, 1000);
+    }
+
+    function submitAnswer() {
+      clearInterval(timer);
+      const selected = document.querySelector('input[name="opt"]:checked');
+      if (selected && parseInt(selected.value) === quiz[current].answer) {
+        score++;
+      }
+      current++;
+      if (current < quiz.length) {
+        showQuestion();
+        startTimer();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('result').innerHTML = `<h2>Your score: ${score} / ${quiz.length}</h2>`;
+    }
+  </script></body>
 </html>
 
 
