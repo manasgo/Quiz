@@ -1,4 +1,6 @@
-<!-- --- index.html --- --><!DOCTYPE html><html lang="en">
+<!-- --- index.html --- -->
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,10 +14,17 @@
   </style>
 </head>
 <body>
-  <h2>Set Mock Test Questions</h2>  <div id="questionForm"></div><button class="btn" onclick="addQuestion()">Add Question</button> <button class="btn" onclick="generatePreview()">Generate Test Link</button>
+  <h2>Set Mock Test Questions</h2>
+
+  <div id="questionForm"></div>
+
+  <button class="btn" onclick="addQuestion()">Add Question</button>
+  <button class="btn" onclick="generatePreview()">Generate Test Link</button>
 
   <h3>Shareable Link:</h3>
-  <textarea id="shareLink" readonly></textarea>  <script>
+  <textarea id="shareLink" readonly></textarea>
+
+  <script>
     let questions = [];
 
     function addQuestion() {
@@ -52,5 +61,6 @@
       const link = `preview.html?data=${base64}`;
       document.getElementById('shareLink').value = link;
     }
-  </script></body>
+  </script>
+</body>
 </html>
