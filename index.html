@@ -1,67 +1,88 @@
-<!-- --- index.html --- -->
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mock Test Creator</title>
+  <title>MCQ Quiz</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    .question-block { border: 1px solid #ccc; padding: 10px; margin-bottom: 15px; }
-    input[type="text"] { width: 100%; margin-bottom: 5px; }
-    .btn { padding: 10px 15px; margin: 10px 0; cursor: pointer; }
-    textarea { width: 100%; height: 80px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    .quiz-container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .question { font-size: 18px; margin-bottom: 10px; }
+    .options button { display: block; width: 100%; margin-bottom: 8px; padding: 10px; font-size: 16px; cursor: pointer; }
+    .timer { margin-top: 15px; }
+    .result { font-size: 20px; text-align: center; margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h2>Set Mock Test Questions</h2>
+  <div class="quiz-container">
+    <div id="quiz">
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <div class="timer">Time Left: <span id="timer">60</span> seconds</div>
+      <button onclick="nextQuestion()">Next</button>
+    </div>
+    <div class="result" id="result" style="display:none;"></div>
+  </div>  <script>
+    const questions = [
+      {
+        question: "Which of the following is a fruit?",
+        options: ["Carrot", "Apple", "Spinach", "Potato", "More than one of the above", "None of the above"],
+        correctIndex: 1,
+      },
+      // Add more questions as needed
+    ];
 
-  <div id="questionForm"></div>
+    let current = 0;
+    let score = 0;
+    let selected = null;
+    let timeLeft = 60;
+    let timerInterval;
 
-  <button class="btn" onclick="addQuestion()">Add Question</button>
-  <button class="btn" onclick="generatePreview()">Generate Test Link</button>
-
-  <h3>Shareable Link:</h3>
-  <textarea id="shareLink" readonly></textarea>
-
-  <script>
-    let questions = [];
-
-    function addQuestion() {
-      const qIndex = questions.length;
-      const div = document.createElement('div');
-      div.className = 'question-block';
-      div.innerHTML = `
-        <label>Question ${qIndex + 1}:</label>
-        <input type="text" id="q${qIndex}" placeholder="Enter question text" required><br>
-        <label>Options:</label><br>
-        <input type="text" id="q${qIndex}opt0" placeholder="Option A" required><br>
-        <input type="text" id="q${qIndex}opt1" placeholder="Option B" required><br>
-        <input type="text" id="q${qIndex}opt2" placeholder="Option C" required><br>
-        <input type="text" id="q${qIndex}opt3" placeholder="Option D" required><br>
-        <input type="text" id="q${qIndex}opt4" placeholder="More than one of the above" value="More than one of the above" required><br>
-        <input type="text" id="q${qIndex}opt5" placeholder="None of the above" value="None of the above" required><br>
-        <label>Correct Option (0-5):</label>
-        <input type="number" id="q${qIndex}correct" min="0" max="5" required>
-      `;
-      document.getElementById('questionForm').appendChild(div);
-      questions.push({});
+    function startQuiz() {
+      showQuestion();
+      timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+          nextQuestion();
+        } else {
+          document.getElementById('timer').innerText = --timeLeft;
+        }
+      }, 1000);
     }
 
-    function generatePreview() {
-      const filledQuestions = questions.map((_, index) => {
-        return {
-          question: document.getElementById(`q${index}`).value.trim(),
-          options: [0,1,2,3,4,5].map(i => document.getElementById(`q${index}opt${i}`).value.trim()),
-          correct: parseInt(document.getElementById(`q${index}correct`).value.trim())
-        };
+    function showQuestion() {
+      timeLeft = 60;
+      const q = questions[current];
+      document.getElementById('question').innerText = q.question;
+      const optionsContainer = document.getElementById('options');
+      optionsContainer.innerHTML = '';
+      q.options.forEach((opt, index) => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.onclick = () => selectOption(index);
+        optionsContainer.appendChild(btn);
       });
-      const json = JSON.stringify(filledQuestions);
-      const base64 = btoa(encodeURIComponent(json));
-      const link = `preview.html?data=${base64}`;
-      document.getElementById('shareLink').value = link;
     }
-  </script>
-</body>
+
+    function selectOption(index) {
+      selected = index;
+    }
+
+    function nextQuestion() {
+      if (selected === questions[current].correctIndex) {
+        score++;
+      }
+      selected = null;
+      current++;
+      if (current < questions.length) {
+        showQuestion();
+      } else {
+        clearInterval(timerInterval);
+        document.getElementById('quiz').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('result').innerText = `Quiz Completed! Your Score: ${score}/${questions.length}`;
+      }
+    }
+
+    startQuiz();
+  </script></body>
 </html>
 
