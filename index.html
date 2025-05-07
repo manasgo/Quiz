@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create MCQ Quiz</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Create Your MCQ Quiz</h1>
+        <form id="quizForm">
+            <label for="quizTitle">Quiz Title:</label>
+            <input type="text" id="quizTitle" value="BPSC TRE 4.0 Mock Test (GS Paper)" required>
+            
+            <div id="questionsContainer">
+                <div class="question">
+                    <h3>Question 1</h3>
+                    <label>Question Text:</label>
+                    <input type="text" class="questionText" required>
+                    <label>Option 1:</label>
+                    <input type="text" class="option" required>
+                    <label>Option 2:</label>
+                    <input type="text" class="option" required>
+                    <label>Option 3:</label>
+                    <input type="text" class="option" required>
+                    <label>Option 4:</label>
+                    <input type="text" class="option" required>
+                    <label>Correct Option (1-4):</label>
+                    <input type="number" class="correctOption" min="1" max="4" required>
+                </div>
+            </div>
+            
+            <button type="button" onclick="addQuestion()">Add Another Question</button>
+            <button type="submit">Generate Quiz</button>
+        </form>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
