@@ -10,6 +10,19 @@
     <div class="container">
         <h1>Create Your MCQ Quiz</h1>
         <form id="quizForm">
+          
+          
+          
+          <!-- Inside the quiz-form div -->
+<div id="quiz-form" style="display: none;">
+    <!-- Add this line for the timer display -->
+    <div id="timer" style="font-size: 18px; margin-bottom: 10px;">Time Remaining: 0:00</div>
+    <div id="question-container"></div>
+    <button id="next-question">Next</button>
+    <button id="submit-quiz">Submit Quiz</button>
+</div>
+
+
             <label for="quizTitle">Quiz Title:</label>
             <input type="text" id="quizTitle" value="BPSC TRE 4.0 Mock Test (GS Paper)" required>
             
